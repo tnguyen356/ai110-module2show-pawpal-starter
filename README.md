@@ -53,6 +53,13 @@ Plan for Alice's pets (100 of 120 minutes used):
 
 ## 🧪 Testing PawPal+
 
+`tests/test_pawpal.py` covers the core scheduling behaviors:
+
+- **Task completion** — marking a task complete/incomplete updates its status.
+- **Recurrence** (`Task.is_due()`) — `"once"` tasks are due until completed then never again; `"weekly"` tasks are due only on their `recurrence_days` (or every day if none are set); `"daily"` tasks recur every day except the exact date they were last completed.
+- **Sorting** — scheduled tasks come out ordered by priority first, then by `start_time` as a tie-breaker within the same priority.
+- **Conflict detection** — an overlapping lower-priority task is skipped (and recorded in `Plan.skipped_conflicts`) rather than double-booked against an already-scheduled task, while non-overlapping tasks of the same priority both get scheduled.
+
 ```bash
 # Run the full test suite:
 pytest
@@ -69,14 +76,23 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-| Feature | Method(s) | Notes |
-|---------|-----------|-------|
-| Task sorting | `Plan.build_plan()`, `_parse_start_time()` | Candidates are sorted by priority first (`high` → `medium` → `low`), then by `start_time` as a tie-breaker within the same priority, so same-priority tasks come out in chronological order. |
-| Filtering | `Plan.build_plan()`, `Task.is_due()` | Before sorting, tasks are filtered down to only those due on the plan's date (`task.is_due(self.for_date)`). Tasks are also skipped if they no longer fit the remaining `time_available_minutes` budget. |
-| Conflict handling | `_time_range()`, `_overlaps()`, `Plan.build_plan()` | Each task's time window (`start_time` to `start_time + duration_minutes`) is checked against every already-scheduled task's window. An overlapping task is skipped rather than double-booked and recorded in `Plan.skipped_conflicts`, since the owner can't do two things at once. |
-| Recurring tasks | `Task.is_due()`, `Task.mark_complete()` / `mark_incomplete()` | `frequency` drives recurrence: `"once"` tasks are due until completed and never again; `"weekly"` tasks are due only on their `recurrence_days` (e.g. `["Mon", "Thu"]`), or every day if none are set; `"daily"` (and any other frequency) tasks are due every day except the exact date they were last completed, tracked via `last_completed_on`. |
 
-See `Plan.explain()` for how scheduled tasks and skipped conflicts are reported, and `tests/test_pawpal.py` for coverage of the recurrence rules above.
+1)  Task sorting:
+- Implement in: `Plan.build_plan()`, `_parse_start_time()` 
+- Candidates are sorted by priority first (`high` → `medium` → `low`), then by `start_time` as a tie-breaker within the same priority, so same-priority tasks come out in chronological order. 
+
+2)  Filtering 
+- Implement in: `Plan.build_plan()`, `Task.is_due()` 
+- Before sorting, tasks are filtered down to only those due on the plan's date (`task.is_due(self.for_date)`). Tasks are also skipped if they no longer fit the remaining `time_available_minutes` budget. 
+
+3)  Conflict handling 
+- Implement in: `_time_range()`, `_overlaps()`, `Plan.build_plan()` 
+- Each task's time window (`start_time` to `start_time + duration_minutes`) is checked against every already-scheduled task's window. 
+- An overlapping task is skipped rather than double-booked and recorded in `Plan.skipped_conflicts`, since the owner can't do two things at once. 
+
+4) Recurring tasks 
+- Implement in: `Task.is_due()`, `Task.mark_complete()` / `mark_incomplete()` 
+- `frequency` drives recurrence: `"once"` tasks are due until completed and never again; `"weekly"` tasks are due only on their `recurrence_days` (e.g. `["Mon", "Thu"]`), or every day if none are set; `"daily"` (and any other frequency) tasks are due every day except the exact date they were last completed, tracked via `last_completed_on`. 
 
 ## 📸 Demo Walkthrough
 

@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from pawpal_system import Task, Pet
+from pawpal_system import Task, Pet, Owner, Plan
 
 MONDAY = date(2026, 10, 19)
 TUESDAY = MONDAY + timedelta(days=1)
@@ -105,3 +105,58 @@ def test_mark_incomplete_resets_last_completed_on():
 
     assert task.is_completed is False
     assert task.is_due(MONDAY) is True
+
+
+def make_plan(*tasks):
+    pet = Pet(name="Buddy", species="Dog", age=5)
+    for task in tasks:
+        pet.add_task(task)
+    owner = Owner(name="Jordan", preferences={})
+    owner.add_pet(pet)
+    return Plan(owner=owner)
+
+
+def test_build_plan_sorts_by_priority_first():
+    low = make_task(name="Brush", priority="low", start_time="07:00 AM", duration_minutes=5)
+    high = make_task(name="Walk", priority="high", start_time="09:00 AM", duration_minutes=5)
+    medium = make_task(name="Feed", priority="medium", start_time="08:00 AM", duration_minutes=5)
+
+    plan = make_plan(low, high, medium)
+    plan.build_plan(time_available_minutes=60)
+
+    assert [task.name for task in plan.scheduled_tasks] == ["Walk", "Feed", "Brush"]
+
+
+def test_build_plan_breaks_priority_ties_by_start_time():
+    later = make_task(name="Dinner", priority="high", start_time="06:00 PM", duration_minutes=5)
+    earlier = make_task(name="Breakfast", priority="high", start_time="07:00 AM", duration_minutes=5)
+
+    plan = make_plan(later, earlier)
+    plan.build_plan(time_available_minutes=60)
+
+    assert [task.name for task in plan.scheduled_tasks] == ["Breakfast", "Dinner"]
+
+
+def test_build_plan_skips_overlapping_lower_priority_task_as_conflict():
+    walk = make_task(name="Walk", priority="high", start_time="08:00 AM", duration_minutes=30)
+    grooming = make_task(name="Grooming", priority="medium", start_time="08:15 AM", duration_minutes=20)
+
+    plan = make_plan(walk, grooming)
+    plan.build_plan(time_available_minutes=60)
+
+    assert [task.name for task in plan.scheduled_tasks] == ["Walk"]
+    assert len(plan.skipped_conflicts) == 1
+    conflicting_task, blocking_task = plan.skipped_conflicts[0]
+    assert conflicting_task.name == "Grooming"
+    assert blocking_task.name == "Walk"
+
+
+def test_build_plan_schedules_non_overlapping_tasks_of_same_priority():
+    morning = make_task(name="Walk", priority="high", start_time="08:00 AM", duration_minutes=30)
+    evening = make_task(name="Dinner", priority="high", start_time="06:00 PM", duration_minutes=10)
+
+    plan = make_plan(morning, evening)
+    plan.build_plan(time_available_minutes=60)
+
+    assert [task.name for task in plan.scheduled_tasks] == ["Walk", "Dinner"]
+    assert plan.skipped_conflicts == []
