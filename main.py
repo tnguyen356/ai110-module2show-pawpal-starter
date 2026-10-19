@@ -31,6 +31,14 @@ Pet1.add_task(Task(name="Vet Visit",
                    start_time="10:00 AM",
                    frequency="yearly"))
 
+Pet2.add_task(Task(name="Grooming",
+                   description="Groom Mittens",
+                   category="Hygiene",
+                   duration_minutes=20,
+                   priority="medium",
+                   start_time="08:00 AM",
+                   frequency="daily"))
+
 plan = Plan(owner=owner)
 plan.build_plan(time_available_minutes=120)
 print(plan.explain())
