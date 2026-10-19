@@ -6,6 +6,10 @@
 
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
+Class OWNER: preference + pets 
+Class PET: pet info + required responsibility
+Class TASKS: include tasks, time
+class PLAN: Build plan  
 
 **b. Design changes**
 

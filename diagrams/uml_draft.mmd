@@ -1,0 +1,42 @@
+classDiagram
+    %% Draft UML for PawPal+. Refine as you implement, so this matches your final code.
+
+    class Owner {
+        +str name
+        +dict preferences
+        +list~Pet~ pets
+        +add_pet(pet: Pet) None
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +int age
+        +list~Task~ tasks
+        +add_task(task: Task) None
+        +get_tasks() list~Task~
+    }
+
+    class Task {
+        +str title
+        +str category
+        +int duration_minutes
+        +str priority
+        +str start_time
+    }
+
+    class Plan {
+        +Owner owner
+        +Pet pet
+        +list~Task~ scheduled_tasks
+        +int time_available_minutes
+        +build_plan(pet: Pet, time_available_minutes: int) None
+        +explain() str
+        +total_time_used() int
+    }
+
+    Owner "1" --> "*" Pet : owns
+    Pet "1" --> "*" Task : has
+    Plan --> Owner : reads preferences
+    Plan --> Pet : schedules
+    Plan "1" --> "*" Task : contains scheduled
