@@ -1,0 +1,53 @@
+classDiagram
+    %% UML for PawPal+, matching the current implementation in pawpal_system.py
+
+    class Owner {
+        +str name
+        +dict preferences
+        +list~Pet~ pets
+        +add_pet(pet: Pet) None
+        +get_all_tasks() list~Task~
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +int age
+        +list~Task~ tasks
+        +add_task(task: Task) None
+        +get_tasks() list~Task~
+    }
+
+    class Task {
+        +str name
+        +str description
+        +str category
+        +int duration_minutes
+        +str priority
+        +str start_time
+        +str frequency
+        +str pet_name
+        +bool is_completed
+        +list~str~ recurrence_days
+        +date last_completed_on
+        +mark_complete(on_date: date) None
+        +mark_incomplete() None
+        +is_due(on_date: date) bool
+    }
+
+    class Plan {
+        +Owner owner
+        +list~Task~ scheduled_tasks
+        +int time_available_minutes
+        +list~tuple~ skipped_conflicts
+        +date for_date
+        +build_plan(time_available_minutes: int, for_date: date) None
+        +explain() str
+        +total_time_used() int
+    }
+
+    Owner "1" --> "*" Pet : owns
+    Pet "1" --> "*" Task : has
+    Plan --> "1" Owner : reads tasks from
+    Plan "1" --> "*" Task : scheduled_tasks
+    Plan "1" --> "*" Task : skipped_conflicts

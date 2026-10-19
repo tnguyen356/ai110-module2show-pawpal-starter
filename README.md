@@ -51,31 +51,7 @@ Plan for Alice's pets (100 of 120 minutes used):
   07:00 AM — Feed for Mittens (10 min) [priority: medium]
 (.venv) PS C:\Users\scarl\OneDrive\Documents\CODEPATH\ai110-module2show-pawpal-starter> 
 
-## 🧪 Testing PawPal+
-
-`tests/test_pawpal.py` covers the core scheduling behaviors:
-
-- **Task completion** — marking a task complete/incomplete updates its status.
-- **Recurrence** (`Task.is_due()`) — `"once"` tasks are due until completed then never again; `"weekly"` tasks are due only on their `recurrence_days` (or every day if none are set); `"daily"` tasks recur every day except the exact date they were last completed.
-- **Sorting** — scheduled tasks come out ordered by priority first, then by `start_time` as a tie-breaker within the same priority.
-- **Conflict detection** — an overlapping lower-priority task is skipped (and recorded in `Plan.skipped_conflicts`) rather than double-booked against an already-scheduled task, while non-overlapping tasks of the same priority both get scheduled.
-
-```bash
-# Run the full test suite:
-pytest
-
-# Run with coverage:
-pytest --cov
-```
-
-Sample test output:
-
-```
-# Paste your pytest output here
-```
-
 ## 📐 Smarter Scheduling
-
 
 1)  Task sorting:
 - Implement in: `Plan.build_plan()`, `_parse_start_time()` 
@@ -94,14 +70,40 @@ Sample test output:
 - Implement in: `Task.is_due()`, `Task.mark_complete()` / `mark_incomplete()` 
 - `frequency` drives recurrence: `"once"` tasks are due until completed and never again; `"weekly"` tasks are due only on their `recurrence_days` (e.g. `["Mon", "Thu"]`), or every day if none are set; `"daily"` (and any other frequency) tasks are due every day except the exact date they were last completed, tracked via `last_completed_on`. 
 
+## 🧪 Testing PawPal+ (python -m pytest)
+
+`tests/test_pawpal.py` covers the core scheduling behaviors:
+
+- **Task completion** — marking a task complete/incomplete updates its status.
+- **Recurrence** (`Task.is_due()`) — `"once"` tasks are due until completed then never again; `"weekly"` tasks are due only on their `recurrence_days` (or every day if none are set); `"daily"` tasks recur every day except the exact date they were last completed.
+- **Sorting** — scheduled tasks come out ordered by priority first, then by `start_time` as a tie-breaker within the same priority.
+- **Conflict detection** — an overlapping lower-priority task is skipped (and recorded in `Plan.skipped_conflicts`) rather than double-booked against an already-scheduled task, while non-overlapping tasks of the same priority both get scheduled.
+- **CONFIDENCE LEVEL** - 5/5
+
+
+Sample test output:
+(.venv) PS C:\Users\scarl\OneDrive\Documents\CODEPATH\ai110-module2show-pawpal-starter> python -m pytest
+============================================================ test session starts ============================================================
+platform win32 -- Python 3.13.14, pytest-9.1.1, pluggy-1.7.0
+rootdir: C:\Users\scarl\OneDrive\Documents\CODEPATH\ai110-module2show-pawpal-starter
+plugins: anyio-4.15.1
+collected 14 items                                                                                                                           
+
+tests\test_pawpal.py ..............                                                                                                    [100%]
+
+============================================================ 14 passed in 0.36s =============================================================
+(.venv) PS C:\Users\scarl\OneDrive\Documents\CODEPATH\ai110-module2show-pawpal-starter> 
+
+
+
 ## 📸 Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
-
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. Run `streamlit run app.py` and enter the **Owner name** at the top of the page.
+2. Under **Pets**, enter a pet's name, species, and age, then click **Add pet**. Repeat for each pet — they'll appear in the "Current pets" table.
+3. Under **Tasks**, pick a pet, a task title, duration, priority, and start time. Choose how it **Repeats**: `daily`, `weekly` (pick the day(s) it recurs on), or `once`. Click **Add task** to add it to the list.
+4. In the "Current tasks" list, use **Filter by pet** to show only the tasks for one or more pets, and check **Completed** on any task that's already done — completed tasks are left out of the next schedule (permanently for `once` tasks, just for today for `daily`/`weekly`).
+5. Set **Time available today (minutes)** under "Build Schedule" to the owner's time budget for the day.
+6. Click **Generate schedule**. PawPal+ builds the day's plan: tasks are chosen by priority first, then by start time, and any task that no longer fits the time budget or overlaps an already-scheduled task is left out.
+7. Read the printed plan: each scheduled task shows its time, pet, duration, and priority, followed by a "Skipped due to time conflicts" section listing any tasks that were bumped because their time window overlapped something higher up the list.
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
